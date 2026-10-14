@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Сводка по нейросетям — Екатерина Черных</title>
+<style>
+:root {
+  --bg: #0f1419;
+  --bg-card: #1a2028;
+  --bg-card-hover: #222a35;
+  --border: #2a3441;
+  --text: #e6edf3;
+  --text-dim: #8b96a5;
+  --accent: #7c5cff;
+  --accent-2: #4d9fff;
+  --green: #4ade80;
+  --yellow: #fbbf24;
+  --red: #f87171;
+  --orange: #fb923c;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+  min-height: 100vh;
+  padding: 24px 16px;
+}
+.container { max-width: 1400px; margin: 0 auto; }
+header {
+  background: linear-gradient(135deg, #7c5cff 0%, #4d9fff 100%);
+  border-radius: 16px;
+  padding: 32px;
+  margin-bottom: 24px;
+  color: white;
+}
+header h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+header p { font-size: 15px; opacity: 0.92; margin-bottom: 4px; }
+header .meta { font-size: 13px; opacity: 0.8; margin-top: 12px; }
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+  margin-bottom: 24px;
+}
+.stat {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+  text-align: center;
+}
+.stat-num { font-size: 24px; font-weight: 700; color: var(--accent); }
+.stat-label { font-size: 12px; color: var(--text-dim); margin-top: 4px; }
+.filters {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 24px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+.filter-label { font-size: 13px; color: var(--text-dim); margin-right: 8px; }
+.filter-btn {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 6px 14px;
+  border-radius: 16px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.filter-btn:hover { border-color: var(--accent); }
+.filter-btn.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: white;
+}
+.legend {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-bottom: 24px;
+  font-size: 13px;
+  color: var(--text-dim);
+}
+.legend span { color: var(--text); margin: 0 4px; }
+.section-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
+  margin: 24px 0 12px 0;
+  padding-left: 4px;
+  border-left: 3px solid var(--accent);
+}
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  gap: 14px;
+  margin-bottom: 16px;
+}
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 18px;
+  transition: all 0.15s;
+}
+.card:hover {
+  border-color: var(--accent);
+  background: var(--bg-card-hover);
+}
+.card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 10px;
+  gap: 8px;
+}
+.card-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.3;
+}
+.card-type {
+  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: 10px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.type-platform { background: #4d9fff20; color: var(--accent-2); border: 1px solid #4d9fff40; }
+.type-aggregator { background: #7c5cff20; color: var(--accent); border: 1px solid #7c5cff40; }
+.type-model { background: #4ade8020; color: var(--green); border: 1px solid #4ade8040; }
+.type-search { background: #fbbf2420; color: var(--yellow); border: 1px solid #fbbf2440; }
+.type-media { background: #fb923c20; color: var(--orange); border: 1px solid #fb923c40; }
+.type-russian { background: #f8717120; color: var(--red); border: 1px solid #f8717140; }
+.type-infra { background: #8b96a520; color: var(--text-dim); border: 1px solid #8b96a540; }
+.card-modality {
+  font-size: 13px;
+  color: var(--text);
+  margin-bottom: 8px;
+  line-height: 1.4;
+}
+.card-modality b { color: var(--text-dim); font-weight: 500; margin-right: 4px; }
+.card-quality {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  margin-bottom: 8px;
+  font-size: 13px;
+}
+.quality-dots { display: inline-flex; gap: 2px; }
+.dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border); }
+.dot.filled { background: var(--green); }
+.card-price {
+  font-size: 13px;
+  color: var(--text);
+  margin-bottom: 8px;
+  line-height: 1.4;
+}
+.card-price b { color: var(--text-dim); font-weight: 500; }
+.card-region {
+  display: inline-block;
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 8px;
+  margin-right: 6px;
+  margin-bottom: 6px;
+}
+.region-vpn { background: #fbbf2415; color: var(--yellow); border: 1px solid #fbbf2430; }
+.region-no-vpn { background: #4ade8015; color: var(--green); border: 1px solid #4ade8030; }
+.region-both { background: #4d9fff15; color: var(--accent-2); border: 1px solid #4d9fff30; }
+.card-mention {
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
+.card-mention b { color: var(--text-dim); font-weight: 600; }
+footer {
+  margin-top: 40px;
+  padding: 20px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--text-dim);
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+<header>
+  <h1>🛠 Сводка по нейросетям и инструментам</h1>
+  <p>Программа «ИИ в работе маркетолога» — Екатерина Черных</p>
+  <p>Справочник моделей, платформ и MCP-сервисов, упоминавшихся на занятиях</p>
+  <div class="meta">Последнее обновление: 14 октября 2026 · Источники: официальные прайсинг-страницы (октябрь 2026)</div>
+</header>
+
+<div class="stats">
+  <div class="stat"><div class="stat-num" id="stat-total">—</div><div class="stat-label">Инструментов</div></div>
+  <div class="stat"><div class="stat-num" id="stat-models">—</div><div class="stat-label">Моделей</div></div>
+  <div class="stat"><div class="stat-num" id="stat-no-vpn">—</div><div class="stat-label">Без VPN</div></div>
+  <div class="stat"><div class="stat-num" id="stat-vpn">—</div><div class="stat-label">Через VPN</div></div>
+</div>
+
+<div class="filters">
+  <span class="filter-label">Фильтр по типу:</span>
+  <button class="filter-btn active" data-filter="all">Все</button>
+  <button class="filter-btn" data-filter="platform">Платформы агентов</button>
+  <button class="filter-btn" data-filter="aggregator">Агрегаторы моделей</button>
+  <button class="filter-btn" data-filter="model">Модели</button>
+  <button class="filter-btn" data-filter="search">Поиск (MCP)</button>
+  <button class="filter-btn" data-filter="media">Генерация контента</button>
+  <button class="filter-btn" data-filter="russian">Российские</button>
+  <button class="filter-btn" data-filter="infra">Инфраструктура</button>
+</div>
+
+<div class="legend">
+  <b>Качество:</b>
+  <span>●●●●</span> отлично · <span>●●●○</span> хорошо · <span>●●○○</span> средне · <span>●○○○</span> ниже среднего
+  &nbsp;|&nbsp;
+  <b>Регион:</b> <span class="region-no-vpn">Без VPN</span> <span class="region-vpn">С VPN</span>
+</div>
+
+<div id="cards-container"></div>
+
+<footer>
+  Страница обновляется после каждого проведённого занятия.<br>
+  Цены и тарифы указаны по состоянию на 14 октября 2026. Перед использованием проверяйте актуальные прайсинг-страницы.
+</footer>
+
+</div>
+
+<script>
+const tools = [
+  {
+    name: "LobeHub",
+    type: "platform",
+    typeLabel: "Платформа агентов",
+    modality: "Текст, изображения, голос, файлы, агенты, MCP-коннекторы, базы знаний, мобильное приложение",
+    quality: 4,
+    price: "Starter $9.90, Premium $19.90, Ultimate $39.90/мес. Free trial 500K credits без карты",
+    region: ["no-vpn", "vpn"],
+    features: "1–4 ГБ памяти, 5–35M credits/мес, скиллы и плагины, синхронизация, агенты с иерархией",
+    mention: "Занятие 3 (26.09), Занятие 4 (14.10)"
+  },
+  {
+    name: "LibreChat",
+    type: "platform",
+    typeLabel: "Open-source платформа",
+    modality: "Текст, изображения (через API), агенты, базы знаний, файлы. Все модели по API",
+    quality: 4,
+    price: "Бесплатно (open source). Сервер: 2 ядра / 4 ГБ RAM ≈ 800 ₽/мес",
+    region: ["no-vpn", "vpn"],
+    features: "Полный контроль над памятью (вся ёмкость диска), нет встроенного маркетплейса, мобильного приложения нет, настройка через терминал",
+    mention: "Занятие 4 (14.10)"
+  },
+  {
+    name: "OpenRouter",
+    type: "aggregator",
+    typeLabel: "Агрегатор моделей",
+    modality: "Текст, изображения, аудио (через модели). 300+ моделей через один API",
+    quality: 4,
+    price: "Pay-as-you-go от $5, комиссия платформы 5.5% (5.0% криптой). BYOK без комиссии до 1M запросов/мес",
+    region: ["vpn"],
+    features: "Streaming, model routing, automatic failover, free tier с rate limits 20 req/min, 200 req/day",
+    mention: "Занятие 3 (26.09), Занятие 4 (14.10)"
+  },
+  {
+    name: "StepFun (阶跃星辰)",
+    type: "aggregator",
+    typeLabel: "Агрегатор моделей",
+    modality: "Текст, изображения (step-2x-large), видео (CogVideoX-3 $0.20/видео), аудио. Multimodal в Step 3+",
+    quality: 4,
+    price: "step-3.5-flash $0.10/$0.30, step-3.7-flash $0.20/$1.15, step-5-preview $1.00/$2.70 за 1M токенов",
+    region: ["vpn"],
+    features: "OpenAI-совместимый API, cache-discounts, Step Plan Credits для IDE/agent tools. Кэш-скидки 80%+",
+    mention: "Занятие 4 (14.10)"
+  },
+  {
+    name: "Hugging Face",
+    type: "aggregator",
+    typeLabel: "Платформа open-source моделей",
+    modality: "Текст, изображения, видео, аудио. 1M+ моделей",
+    quality: 3,
+    price: "Бесплатный inference + платные Inference Endpoints. Smart auto $9/мес HuggingChat",
+    region: ["vpn"],
+    features: "Хостинг приватных и публичных моделей, Spaces для демо, API-доступ",
+    mention: "Занятие 4 (14.10)"
+  },
+  {
+    name: "DeepSeek V4-Flash",
+    type: "model",
+    typeLabel: "Модель (MoE 13B/284B)",
+    modality: "Текст, изображения, видео, аудио. 1M контекст",
+    quality: 4,
+    price: "$0.14 input / $0.28 output за 1M токенов. Кэш-хит $0.0028/M",
+    region: ["vpn"],
+    features: "Hybrid reasoning modes, 81% SWE-bench Verified, развёртывается в OpenRouter",
+    mention: "Занятие 3 (26.09), Занятие 4 (14.10)"
+  },
+  {
+    name: "DeepSeek V4-Pro",
+    type: "model",
+    typeLabel: "Модель (MoE 49B/1.6T)",
+    modality: "Текст, изображения, видео, аудио. 1M контекст",
+    quality: 4,
+    price: "$0.435 input / $0.87 output за 1M токенов. Кэш-хит $0.003625/M",
+    region: ["vpn"],
+    features: "Frontier-качество для агентских задач, дешевле Claude Opus / GPT-5",
+    mention: "Занятие 3 (26.09)"
+  },
+  {
+    name: "GLM 5.3 (Z.ai)",
+    type: "model",
+    typeLabel: "Модель (MoE 40B/744B)",
+    modality: "Текст. GLM-5V Turbo: изображения, видео, файлы",
+    quality: 4,
+    price: "$1.40 input / $4.40 output за 1M токенов. Flash-версии от $0.07/$0.25",
+    region: ["vpn"],
+    features: "200K контекст, thinking mode, agent workflows, 3-10× дешевле Claude/GPT",
+    mention: "Занятие 3 (26.09), Занятие 4 (14.10)"
+  },
+  {
+    name: "Kimi K3 (Moonshot)",
+    type: "model",
+    typeLabel: "Модель (MoE, 2.8T параметров)",
+    modality: "Текст. Мультимодальная (1M контекст)",
+    quality: 4,
+    price: "$3 input / $15 output за 1M токенов. Кэш-хит $0.30/M. Batch 60% скидка",
+    region: ["vpn"],
+    features: "1M контекст, frontier-качество reasoning + агенты, Kimi K3 License для open weights",
+    mention: "Занятие 3 (26.09)"
+  },
+  {
+    name: "Kimi K2.6 (Moonshot)",
+    type: "model",
+    typeLabel: "Модель",
+    modality: "Текст",
+    quality: 3,
+    price: "$0.95 input / $4.00 output за 1M токенов. Кэш-хит $0.16/M",
+    region: ["vpn"],
+    features: "256K контекст, K2.7 Code для кодинга, modified MIT license для open weights",
+    mention: "Занятие 3 (26.09)"
+  },
+  {
+    name: "Xiaomi MiMo V2.6-Pro",
+    type: "model",
+    typeLabel: "Модель (MoE 42B/1.02T)",
+    modality: "Текст. 1M контекст",
+    quality: 4,
+    price: "$0.435 input / $0.87 output за 1M токенов",
+    region: ["vpn"],
+    features: "Open-weights MIT license, лидер open-weight бенчмарков, UltraSpeed версия 10× быстрее за 10× цену",
+    mention: "Занятие 3 (26.09), Занятие 4 (14.10)"
+  },
+  {
+    name: "Xiaomi MiMo V2.6-Flash",
+    type: "model",
+    typeLabel: "Модель (MoE 15B/309B)",
+    modality: "Текст. 1M контекст",
+    quality: 3,
+    price: "$0.14 input / $0.28 output за 1M токенов",
+    region: ["vpn"],
+    features: "Самая дешёвая качественная модель для рутинных задач, MIT license",
+    mention: "Занятие 3 (26.09)"
+  },
+  {
+    name: "ChatGPT (OpenAI)",
+    type: "model",
+    typeLabel: "Модель + генерация изображений",
+    modality: "Текст, изображения (DALL-E), аудио (TTS/STT), код. Multimodal",
+    quality: 4,
+    price: "Plus $20/мес, Pro $200/мес. API pay-as-you-go по моделям",
+    region: ["vpn"],
+    features: "Используется в LobeHub для генерации изображений (лимит 6 за вызов). Лидер в простых сценариях",
+    mention: "Занятие 4 (14.10)"
+  },
+  {
+    name: "Tavily (MCP-поиск)",
+    type: "search",
+    typeLabel: "Поисковый MCP-сервер",
+    modality: "Web search + extract. Возвращает ссылки + контент + готовый ответ",
+    quality: 4,
+    price: "Free 1000 credits/мес, $30/мес 4000 credits. PAYG $0.008/credit",
+    region: ["vpn"],
+    features: "1 credit basic, 2 credits advanced search. Native LangChain integration. Приобретён Nebius в начале 2026",
+    mention: "Занятие 3 (26.09)"
+  },
+  {
+    name: "Firecrawl (MCP-парсинг)",
+    type: "search",
+    typeLabel: "Парсинг и crawling",
+    modality: "Web search, scrape, crawl, interact. JavaScript rendering",
+    quality: 4,
+    price: "Free 1000 credits/мес, $16/мес 5000 credits, Standard $99/мес 100K страниц",
+    region: ["vpn"],
+    features: "Token-efficient output, 180K+ GitHub stars, 1M+ разработчиков",
+    mention: "Занятие 3 (26.09)"
+  },
+  {
+    name: "Exa.ai (MCP-поиск)",
+    type: "search",
+    typeLabel: "Neural search",
+    modality: "Семантический поиск + extract контента. Собственный нейронный индекс",
+    quality: 4,
+    price: "$20 + $10/мес бесплатные credits, $7/1000 поисков, deep search $12-15/1000",
+    region: ["vpn"],
+    features: "Концептуальный поиск вместо keyword matching. 1 поиск = 10 результатов с текстом",
+    mention: "Занятие 3 (26.09), Занятие 4 (14.10)"
+  },
+  {
+    name: "Apify (MCP-парсинг)",
+    type: "search",
+    typeLabel: "Платформа scraping",
+    modality: "Web scraping, automation, marketplace готовых scrapers (Actors)",
+    quality: 3,
+    price: "Free tier, pay-as-you-go от $0.04/1K результатов",
+    region: ["vpn"],
+    features: "Готовые scrapers для соцсетей, маркетплейсов, поисковиков. Stealth mode",
+    mention: "Занятие 3 (26.09)"
+  },
+  {
+    name: "Nano Banana (Gemini 2.5 Flash Image)",
+    type: "media",
+    typeLabel: "Генерация изображений",
+    modality: "Генерация и редактирование изображений. Character consistency, multi-image fusion",
+    quality: 4,
+    price: "API $0.039 за 1K изображение. Pro $0.14-0.24. Lite $0.0336",
+    region: ["vpn"],
+    features: "Лучшая в редактировании изображений. Доступен через Telegram-бот (без VPN)",
+    mention: "Занятие 4 (14.10)"
+  },
+  {
+    name: "Deepgram (транскрибация)",
+    type: "media",
+    typeLabel: "Speech-to-Text API",
+    modality: "Аудио: транскрибация, диаризация (спикеры), TTS, Voice Agent",
+    quality: 4,
+    price: "Nova-3: $0.0043/мин (pre-recorded), $0.0048-0.0078/мин streaming. $200 free credit",
+    region: ["vpn"],
+    features: "Nova-3 и Flux модели, smart format, биллинг по секундам, TTS $0.015-0.045/1K chars",
+    mention: "Занятие 3 (26.09)"
+  },
+  {
+    name: "NotebookLM (Google)",
+    type: "media",
+    typeLabel: "Контекстный ИИ",
+    modality: "Текст, аудио (подкасты), видео-пересказ, ментальные карты, тесты",
+    quality: 3,
+    price: "Free 100 notebooks, 50 источников/notebook, 50 чатов/день. Plus $4.99, Pro $19.99/мес",
+    region: ["vpn"],
+    features: "Закрытый контур Google, не для генерации длинных текстов. Цитаты с указанием страницы источника",
+    mention: "Занятие 3 (26.09)"
+  },
+  {
+    name: "Алиса AI (Yandex)",
+    type: "russian",
+    typeLabel: "Российский ассистент",
+    modality: "Текст, изображения (YandexART), голос, поиск, интеграция с сервисами Яндекса",
+    quality: 3,
+    price: "Alice AI LLM 0.25 ₽/1K input, 1.02 ₽/1K output. Алиса Плюс — бусты 100 ₽ за пакет",
+    region: ["no-vpn"],
+    features: "Данные используются для обучения Алисы. Не подходит для чувствительных данных",
+    mention: "Занятие 3 (26.09)"
+  },
+  {
+    name: "Yandex AI Studio (YandexGPT)",
+    type: "russian",
+    typeLabel: "Российские LLM",
+    modality: "Текст, изображения (YandexART), распознавание речи (SpeechKit)",
+    quality: 3,
+    price: "YandexGPT Lite 0.10 ₽/1K, Pro 5 0.61 ₽/1K, Pro 5.1 0.41 ₽/1K (вход/выход одинаково)",
+    region: ["no-vpn"],
+    features: "Платформа aistudio.yandex.ru. Частично безопасно для данных, но ZDR не подтверждён",
+    mention: "Занятие 3 (26.09)"
+  },
+  {
+    name: "GigaChat (Сбер)",
+    type: "russian",
+    typeLabel: "Российская LLM",
+    modality: "Текст, изображения, аудио (распознавание и синтез)",
+    quality: 3,
+    price: "Free tier + pay-as-you-go. Точные тарифы через developers.sber.ru",
+    region: ["no-vpn"],
+    features: "Доступен через REST API. Подходит для задач на русском. ZDR не подтверждён документально",
+    mention: "Занятие 3 (26.09)"
+  },
+  {
+    name: "Railway",
+    type: "infra",
+    typeLabel: "Облачный хостинг",
+    modality: "Деплой приложений (Docker, GitHub), базы данных, крон-задачи",
+    quality: 4,
+    price: "Free trial 30 дней, Hobby $5/мес, Pro $20/мес. Без VPN",
+    region: ["no-vpn"],
+    features: "Деплой из GitHub в один клик, serverless БД, поддержка Docker. Sleep через 3-5 часов неактивности",
+    mention: "Занятие 4 (14.10)"
+  },
+  {
+    name: "GitHub",
+    type: "infra",
+    typeLabel: "Хостинг кода",
+    modality: "Git-репозитории, issues, actions, Pages, Copilot",
+    quality: 5,
+    price: "Бесплатно для public-репозиториев. Pro $4/мес, Team $4/user/мес",
+    region: ["no-vpn", "vpn"],
+    features: "CI/CD, Pages (статические сайты), MCP-репозитории, secret scanning",
+    mention: "Занятие 4 (14.10)"
+  },
+  {
+    name: "Google Colab",
+    type: "infra",
+    typeLabel: "Облачные ноутбуки",
+    modality: "Python-среда с GPU/TPU, pre-installed библиотеки",
+    quality: 4,
+    price: "Free tier (с ограничениями), Pro $9.99/мес, Pro+ $49.99/мес",
+    region: ["no-vpn", "vpn"],
+    features: "Запуск Python-кода без локальной установки. Использовался для генерации Telegram Session String",
+    mention: "Занятие 4 (14.10)"
+  },
+  {
+    name: "Telegram MCP (telegram-mcp-http)",
+    type: "infra",
+    typeLabel: "MCP-сервер",
+    modality: "Полный доступ к Telegram через личный аккаунт (MTProto): сообщения, диалоги, поиск, контакты",
+    quality: 4,
+    price: "Open source (бесплатно). Хостинг на Railway: $5/мес",
+    region: ["no-vpn"],
+    features: "Обходит ограничения Bot API. Self-hosted, секреты хранятся в переменных окружения Railway",
+    mention: "Занятие 4 (14.10)"
+  },
+  {
+    name: "TGStat MCP",
+    type: "infra",
+    typeLabel: "Telegram-аналитика MCP",
+    modality: "Аналитика Telegram-каналов: охваты, ERR, подписчики, цитирование, упоминания",
+    quality: 4,
+    price: "≈2000 ₽/мес (по данным конспекта)",
+    region: ["no-vpn"],
+    features: "Официальная интеграция с TGStat. Профессиональный инструмент для SMM-аналитики",
+    mention: "Занятие 4 (14.10)"
+  },
+  {
+    name: "Mira (Telegram-бот)",
+    type: "media",
+    typeLabel: "Telegram-бот",
+    modality: "Саммари писем, события календаря, напоминания, интеграция с Google Calendar",
+    quality: 3,
+    price: "≈1000 ₽/неделю (≈4000 ₽/мес). Оплата через Telegram Wallet (крипта TON/звёзды)",
+    region: ["no-vpn"],
+    features: "Официальный бот внутри Telegram. Ограниченный набор скиллов и интеграций",
+    mention: "Занятие 4 (14.10)"
+  },
+  {
+    name: "Composio",
+    type: "infra",
+    typeLabel: "Агрегатор MCP-интеграций",
+    modality: "1500+ сервисов: Google, GitHub, Slack, Trello, Notion, Linear, Asana, Twitter, Instagram, Salesforce",
+    quality: 4,
+    price: "Free tier, Pro $29/мес (50K вызовов), Team $99/мес. Pay-as-you-go",
+    region: ["vpn"],
+    features: "Единая авторизация для всех интеграций. Альтернатива ручному OAuth",
+    mention: "Занятие 3 (26.09), Занятие 4 (14.10)"
+  }
+];
+
+const typeLabels = {
+  platform: "Платформы агентов",
+  aggregator: "Агрегаторы моделей",
+  model: "Модели",
+  search: "Поиск (MCP)",
+  media: "Генерация контента",
+  russian: "Российские",
+  infra: "Инфраструктура"
+};
+
+const typeOrder = ["platform", "aggregator", "model", "search", "media", "russian", "infra"];
+
+const qualityDots = (n) => {
+  let html = '<span class="quality-dots">';
+  for (let i = 0; i < 4; i++) {
+    html += `<span class="dot ${i < n ? 'filled' : ''}"></span>`;
+  }
+  html += '</span>';
+  return html;
+};
+
+const regionBadges = (regions) => {
+  let html = '';
+  if (regions.includes('no-vpn')) html += '<span class="card-region region-no-vpn">Без VPN</span>';
+  if (regions.includes('vpn')) html += '<span class="card-region region-vpn">С VPN</span>';
+  return html;
+};
+
+const renderCard = (tool) => `
+  <div class="card" data-type="${tool.type}">
+    <div class="card-head">
+      <div class="card-title">${tool.name}</div>
+      <div class="card-type type-${tool.type}">${tool.typeLabel}</div>
+    </div>
+    <div class="card-modality"><b>Мультимодальность:</b>${tool.modality}</div>
+    <div class="card-quality">
+      <span class="quality-dots">${qualityDots(tool.quality)}</span>
+      <span>${'●●●●●'.slice(0, tool.quality)}${'○○○○○'.slice(tool.quality)}</span>
+    </div>
+    <div class="card-price"><b>Стоимость:</b> ${tool.price}</div>
+    <div>${regionBadges(tool.region)}</div>
+    <div class="card-modality" style="margin-top:8px;margin-bottom:0;"><b>Особенности:</b>${tool.features}</div>
+    <div class="card-mention"><b>Упоминалось:</b> ${tool.mention}</div>
+  </div>
+`;
+
+const renderAll = () => {
+  const container = document.getElementById('cards-container');
+  let html = '';
+  for (const type of typeOrder) {
+    const filtered = tools.filter(t => t.type === type);
+    if (filtered.length === 0) continue;
+    html += `<div class="section-title">${typeLabels[type]} (${filtered.length})</div>`;
+    html += '<div class="grid">';
+    for (const tool of filtered) {
+      html += renderCard(tool);
+    }
+    html += '</div>';
+  }
+  container.innerHTML = html;
+  updateStats();
+};
+
+const updateStats = () => {
+  document.getElementById('stat-total').textContent = tools.length;
+  document.getElementById('stat-models').textContent = tools.filter(t => t.type === 'model' || t.type === 'aggregator').length;
+  document.getElementById('stat-no-vpn').textContent = tools.filter(t => t.region.includes('no-vpn')).length;
+  document.getElementById('stat-vpn').textContent = tools.filter(t => t.region.includes('vpn')).length;
+};
+
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const filter = btn.dataset.filter;
+    const container = document.getElementById('cards-container');
+    let html = '';
+    
+    if (filter === 'all') {
+      renderAll();
+      return;
+    }
+    
+    const filtered = tools.filter(t => t.type === filter);
+    html += `<div class="section-title">${typeLabels[filter]} (${filtered.length})</div>`;
+    html += '<div class="grid">';
+    for (const tool of filtered) {
+      html += renderCard(tool);
+    }
+    html += '</div>';
+    container.innerHTML = html;
+  });
+});
+
+renderAll();
+</script>
+</body>
+</html>
